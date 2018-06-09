@@ -1,12 +1,13 @@
 #!/bin/bash
 echo "Checking for CUDA and installing."
 # Check for CUDA and try to install.
-if ! dpkg-query -W cuda-8-0; then
+if ! dpkg-query -W cuda-9-0; then
   # The 16.04 installer works with 16.10.
-  curl -O https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
-  dpkg -i ./cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
+  curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
+  dpkg -i ./cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
+  apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
   apt-get update
-  apt-get install cuda-8-0 -y
+  apt-get install cuda-9-0 -y
 fi
 # Enable persistence mode
 nvidia-smi -pm 1
@@ -14,9 +15,19 @@ nvidia-smi -pm 1
 #export LD_LIBRARY_PATH=/usr/local/cuda/lib64/
 
 # Install docker
-curl -fsSL get.docker.com -o get-docker.sh
-sh get-docker.sh
-rm get-docker.sh
+apt-get update
+apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+apt-get update
+apt-get install -y docker-ce
 
 # Install nvidia-container-runtime
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
